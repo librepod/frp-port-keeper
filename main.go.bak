@@ -1,0 +1,104 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"net/http"
+
+	// "github.com/philippgille/gokv/file"
+	"errors"
+	"os"
+)
+
+func main() {
+	// options := file.DefaultOptions
+	//
+	// // Create client
+	// client, err := file.NewStore(options)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//
+ 	// defer client.Close()
+
+	// Store, retrieve, print and delete a value
+	// interactWithStore(client)
+
+  mux := http.NewServeMux()
+	mux.HandleFunc("/", getRoot)
+	mux.HandleFunc("/hello", getHello)
+	// mux.HandleFunc("/register", handleRegister)
+
+  err := http.ListenAndServe("127.0.0.1:8080", mux)
+
+  if errors.Is(err, http.ErrServerClosed) {
+		fmt.Printf("server closed\n")
+	} else if err != nil {
+		fmt.Printf("error starting server: %s\n", err)
+		os.Exit(1)
+	}
+}
+
+const keyServerAddr = "serverAddr"
+
+func getRoot(w http.ResponseWriter, r *http.Request) {
+  ctx := r.Context()
+
+	hasFirst := r.URL.Query().Has("first")
+	first := r.URL.Query().Get("first")
+	hasSecond := r.URL.Query().Has("second")
+	second := r.URL.Query().Get("second")
+
+	fmt.Printf("%s: got / request. first(%t)=%s, second(%t)=%s\n",
+		ctx.Value("keyServerAddr"),
+		hasFirst, first,
+		hasSecond, second)
+
+	io.WriteString(w, "This is my website!\n")
+}
+
+func getHello(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("got /hello request\n")
+    io.WriteString(w, "Hello, HTTP!\n")
+}
+
+type Record struct {
+	Port int
+	IP   string
+}
+
+func NewRecord(port int, ip string) Record {
+	return Record{
+		Port: port,
+		IP:   ip,
+	}
+}
+
+// func handleRegister(w http.ResponseWriter, r *http.Request) {
+// 	w.Write([]byte("Hello World"))
+// 	// Store value
+// 	val := NewRecord(123, "192.168.2.0")
+
+	// err := store.Set("aloha", val)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//
+	// // Retrieve value
+	// retrievedVal := new(foo)
+	// found, err := store.Get("aloha", retrievedVal)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// if !found {
+	// 	panic("Value not found")
+	// }
+	//
+	// fmt.Printf("foo: %+v", *retrievedVal) // Prints `foo: {Bar:baz}`
+
+	// Delete value
+	// err = store.Delete("foo123")
+	// if err != nil {
+	// 	panic(err)
+	// }
+// }
