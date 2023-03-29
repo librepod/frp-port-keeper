@@ -1,22 +1,15 @@
 package ports
 
 import (
-  "fmt"
 	"strconv"
 	"strings"
+  "errors"
 )
 
-// func Next() func() int {
-//   p := 0
-//   fmt.Println("Generating next port...")
-//
-//   // Closure captures variable n
-//   return func() int {
-//     p += 1
-//     return p
-//   }
-// }
-
+// This is a closure that accepts a port ranges in string representation like this:
+// `3000-8000,60000-65000` and returns a function upon calling which it returns two
+// values: next port number and an error in case if no more ports left from the
+// ranges of ports supplied.
 func InitPortIterator(rangeStr string) func() (int, error) {
 	rangeSlice := strings.Split(rangeStr, ",")
 	i := 0
@@ -25,13 +18,12 @@ func InitPortIterator(rangeStr string) func() (int, error) {
 		rangeVals := strings.Split(strings.TrimSpace(r), "-")
 		start, _ := strconv.Atoi(rangeVals[0])
 		end, _ := strconv.Atoi(rangeVals[1])
-		if start > end {
-			panic("Invalid range")
-		}
-		ranges[i] = []int{start, end}
 
-    fmt.Printf("ranges[i]: %v\n", ranges[i])
-    fmt.Printf("ranges: %v\n", ranges)
+		if start > end {
+			panic("😱 Invalid range supplied!")
+		}
+
+		ranges[i] = []int{start, end}
 
 	}
 	i = ranges[0][0]
@@ -42,13 +34,13 @@ func InitPortIterator(rangeStr string) func() (int, error) {
 		if i > ranges[j][1] {
 			j++
 			if j >= len(ranges) {
-				return 0, fmt.Errorf("😱 Whoa! No more ports left!")
+        j--
+				return 0, errors.New("no more ports left")
 			}
 			i = ranges[j][0]
 		}
 		val := i
 		i++
-    fmt.Println("  Returning port: ", val)
 		return val, nil
 	}
 }
