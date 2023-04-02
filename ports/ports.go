@@ -1,16 +1,16 @@
 package ports
 
 import (
+	"errors"
 	"strconv"
 	"strings"
-  "errors"
 )
 
-// This is a closure that accepts a port ranges in string representation like this:
+// This is a closure that accepts port ranges in string representation like this:
 // `3000-8000,60000-65000` and returns a function upon calling which it returns two
 // values: next port number and an error in case if no more ports left from the
 // ranges of ports supplied.
-func InitPortIterator(rangeStr string) func() (int, error) {
+func InitAllPortsIterator(rangeStr string) func() (int, error) {
 	rangeSlice := strings.Split(rangeStr, ",")
 	i := 0
 	ranges := make([][]int, len(rangeSlice))
@@ -29,13 +29,13 @@ func InitPortIterator(rangeStr string) func() (int, error) {
 	i = ranges[0][0]
 	j := 0
 
-  // Closure captures range variables
+	// Closure captures range variables
 	return func() (int, error) {
 		if i > ranges[j][1] {
 			j++
 			if j >= len(ranges) {
-        j--
-				return 0, errors.New("no more ports left")
+				j--
+				return 0, errors.New("no more free ports left")
 			}
 			i = ranges[j][0]
 		}
@@ -43,4 +43,16 @@ func InitPortIterator(rangeStr string) func() (int, error) {
 		i++
 		return val, nil
 	}
+}
+
+func InitAvailablePortsIterator(availablePorts []int) func() (int, error) {
+	i := 0
+	return func() (int, error) {
+    if i >= len(availablePorts) {
+      return 0, errors.New("no more free ports left")
+    }
+		r := availablePorts[i]
+		i++
+		return r, nil
+  }
 }
