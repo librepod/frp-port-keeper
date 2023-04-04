@@ -5,4 +5,4 @@
   go test -v ./...
 
 @build:
-  go build
+  go build -o bin/frp-manager ./main.go
