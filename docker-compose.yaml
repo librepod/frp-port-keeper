@@ -1,0 +1,71 @@
+volumes:
+  minio_data:
+  redis_data:
+
+services:
+
+  # minio:
+  #   image: quay.io/minio/minio:RELEASE.2023-03-24T21-41-23Z
+  #   restart: always
+  #   ports:
+  #     - 9000:9000
+  #     - 9001:9001
+  #   environment:
+  #     - MINIO_ROOT_USER=minio
+  #     - MINIO_ROOT_PASSWORD=minio123
+  #   volumes:
+  #     - minio_data:/data
+  #   command: 
+  #     - server
+  #     - /data
+  #     - --console-address
+  #     - ":9001"
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - 6379:6379
+    command: redis-server --save 60 1 --loglevel warning
+    # volumes: 
+    #   - redis_data:/data
+
+  redis-commander:
+    container_name: redis-commander
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: always
+    environment:
+      REDIS_HOSTS: redis
+    ports:
+      - 8081:8081
+
+  frps:
+    image: snowdreamtech/frps:0.48.0
+    container_name: frps
+    ports:
+      - 7400:7400
+      - 7500:7500
+    volumes:
+      - ./frps.ini:/etc/frp/frps.ini
+    network_mode: host
+    restart: always
+    profiles:
+      - frps
+
+  frpc:
+    image: snowdreamtech/frpc:0.48.0
+    container_name: frpc
+    environment:
+      MACHINE_ID: alexmachine
+    ports:
+      - 7400:7400
+      - 7500:7500
+    depends_on:
+      - frps
+    volumes:
+      - ./frpc.ini:/etc/frp/frpc.ini
+    network_mode: host
+    restart: always
+    command: frpc -c /etc/frp/frpc.ini
+    profiles:
+      - frpc
