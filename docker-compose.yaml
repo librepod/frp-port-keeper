@@ -13,8 +13,8 @@ services:
   #   environment:
   #     - MINIO_ROOT_USER=minio
   #     - MINIO_ROOT_PASSWORD=minio123
-  #   volumes:
   #     - minio_data:/data
+  #   volumes:
   #   command: 
   #     - server
   #     - /data
@@ -27,8 +27,10 @@ services:
     ports:
       - 6379:6379
     command: redis-server --save 60 1 --loglevel warning
-    # volumes: 
-    #   - redis_data:/data
+    profiles:
+      - redis
+    volumes: 
+      - redis_data:/data
 
   redis-commander:
     container_name: redis-commander
@@ -38,6 +40,8 @@ services:
       REDIS_HOSTS: redis
     ports:
       - 8081:8081
+    profiles:
+      - redis
 
   frps:
     image: snowdreamtech/frps:0.48.0
@@ -49,14 +53,12 @@ services:
       - ./frps.ini:/etc/frp/frps.ini
     network_mode: host
     restart: always
-    profiles:
-      - frps
 
   frpc:
     image: snowdreamtech/frpc:0.48.0
     container_name: frpc
     environment:
-      MACHINE_ID: alexmachine
+      USER: testuser_1
     ports:
       - 7400:7400
       - 7500:7500
@@ -67,5 +69,3 @@ services:
     network_mode: host
     restart: always
     command: frpc -c /etc/frp/frpc.ini
-    profiles:
-      - frpc

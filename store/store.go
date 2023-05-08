@@ -5,25 +5,19 @@ import (
 	"fmt"
 	"time"
 
-	// "os"
-
 	"github.com/philippgille/gokv"
-
-	// "github.com/philippgille/gokv/file"
-	// "github.com/philippgille/gokv/encoding"
-	// "github.com/philippgille/gokv/s3"
-	"github.com/philippgille/gokv/redis"
+	"github.com/philippgille/gokv/file"
 )
 
-type MachineRecord struct {
+type UserRecord struct {
 	Port      int
-	IP        string
+	// IP        string
 	CreatedAt time.Time
 }
 
 type PortRecord struct {
-	MachineID string
-	IP        string
+	User string
+	// IP        string
 	CreatedAt time.Time
 }
 
@@ -42,36 +36,26 @@ func PrettyStruct(data interface{}) (string, error) {
 	return string(val), nil
 }
 
+// Redis Store
+// func createStore() gokv.Store {
+// 	options := redis.DefaultOptions // Address: "localhost:6379", Password: "", DB: 0
+// 	db, err := redis.NewClient(options)
+// 	if err != nil {
+// 		fmt.Println("Error occured connecting to redis: ", err)
+// 		panic(err)
+// 	}
+// 	return db
+// }
+
+// File Store
 func createStore() gokv.Store {
-	options := redis.DefaultOptions // Address: "localhost:6379", Password: "", DB: 0
-	db, err := redis.NewClient(options)
+	options := file.DefaultOptions
+	store, err := file.NewStore(options)
 	if err != nil {
-		fmt.Println("Error occured connecting to redis: ", err)
 		panic(err)
 	}
-	return db
+	return store
 }
-
-// func CreateStore() gokv.Store {
-//   if !checkConnection() {
-// 		panic("No connection to S3 could be established. Probably not running in a proper test environment.")
-// 	}
-// 	options := s3.DefaultOptions
-// 	store, err := s3.NewStore(options)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return store
-// }
-
-// func CreateStore() gokv.Store {
-// 	options := file.DefaultOptions
-// 	store, err := file.NewStore(options)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return store
-// }
 
 // checkConnection returns true if a connection could be made, false otherwise.
 // func checkConnection() bool {

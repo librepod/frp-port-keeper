@@ -53,8 +53,8 @@ type Response struct {
 
 func PortRegistrationsHandler(c *gin.Context) {
 	fmt.Printf("Query params: %+v\n", c.Request.URL.Query())
-	fmt.Printf("Body payload: %+v\n", c.Copy().Request.Body)
-	// Retrieve the request body
+
+	// Validate the request payload
 	var requestBody Request
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		fmt.Println("error trying to bind request body")
@@ -67,11 +67,8 @@ func PortRegistrationsHandler(c *gin.Context) {
 		return
 	}
 
-	noMorePortsBody := gin.H{"reject": true, "reject_reason": "no more ports left"}
-	defaultResBody := gin.H{"reject": false, "unchange": true}
-
 	op := c.Query("op")
-	fmt.Printf("🔅 Got request Operation: %s\n", op)
+	fmt.Printf("Got %s request operation\n", op)
 
 	// Pretty print the request body to console
 	requestBodyBytes, err := json.MarshalIndent(requestBody, "", "  ")
@@ -82,27 +79,23 @@ func PortRegistrationsHandler(c *gin.Context) {
 
 	if op != "NewProxy" {
 		fmt.Printf("returning default response...\n")
-		c.JSON(http.StatusOK, defaultResBody)
+		c.JSON(http.StatusOK, gin.H{"reject": false, "unchange": true})
 		return
 	}
 
-	fmt.Println("👋 Aloha!!! We got NewProxy operation!")
+	fmt.Println("Processing NewProxy operation...")
 
-	p, err := ports.GetFreePort()
-	if err != nil && err.Error() == "no more free ports left" {
-		fmt.Println("No more ports left")
-		c.JSON(http.StatusForbidden, noMorePortsBody)
+	p, err := ports.GetFreePort(requestBody.Content.User.User)
+	if err != nil {
+		fmt.Printf("Error ocurred getting free port: %+v\n", err.Error())
+		c.JSON(http.StatusOK, gin.H{"reject": true, "reject_reason": err.Error()})
 		return
 	}
 
 	var res = Response{
 		Unchange: false,
-	// Save the alocated port to DB
-	// var db = store.CreateStore()
-	// db.Set()
-
 		Content: Content{
-			User: requestBody.Content.User,
+			User:      requestBody.Content.User,
 			ProxyName: requestBody.Content.ProxyName,
 			ProxyType: requestBody.Content.ProxyType,
 			ProxyPort: p,
@@ -110,8 +103,6 @@ func PortRegistrationsHandler(c *gin.Context) {
 	}
 
 	responseBodyBytes, _ := json.MarshalIndent(res, "", "  ")
-	fmt.Println("Allowing NewProxy connection...")
-	fmt.Println("Response body: ", string(responseBodyBytes))
-
+	fmt.Printf("Allowing connection with response payload: %+v\n", string(responseBodyBytes))
 	c.JSON(http.StatusOK, res)
 }

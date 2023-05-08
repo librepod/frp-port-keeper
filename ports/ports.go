@@ -6,25 +6,41 @@ import (
 	"main/store"
 	"strconv"
 	"strings"
+	"time"
 )
+
+const NO_MORE_PORTS = "NO_MORE_FREE_PORTS_LEFT"
 
 var nextPort func() (int, error)
 
 func init() {
 	// TODO: Pass port range from frps.ini config
-	allowedPorts := "6007-6010,6013,6017"
+	allowedPorts := "6008-6010,6017"
 	nextPort = createAllowPortsGenerator(allowedPorts)
 }
 
-func GetFreePort() (int, error) {
-	fmt.Println("Getting a pree port")
+func GetFreePort(userName string) (int, error) {
+	fmt.Println("Looking for a free port...")
+
+	userRecord := store.UserRecord{}
+	found, dbErr := store.DB.Get(userName, &userRecord)
+	if dbErr != nil {
+		fmt.Println("error occurred accessing db")
+		panic(dbErr)
+	}
+	if found {
+		fmt.Println("Found previously allocated port number: ", userRecord.Port)
+		return userRecord.Port, nil
+	}
+
+	fmt.Printf("No record in DB for the '%s' user\n", userName)
+	fmt.Println("Allocating new port number for the user...")
 
 	freePort := 0
-
 	// Iterate through all the allowedPorts skeeping those that had been already
 	// alocated to somebody (have records in DB)
 	for p, err := nextPort(); err == nil; p, err = nextPort() {
-		fmt.Printf("Trying port %s...\n", p)
+		fmt.Printf("Trying port %+v...\n", p)
 		portRecord := store.PortRecord{}
 		found, dbErr := store.DB.Get(strconv.Itoa(p), &portRecord)
 		if dbErr != nil {
@@ -39,10 +55,13 @@ func GetFreePort() (int, error) {
 	}
 
 	if freePort == 0 {
-		return 0, errors.New("no more free ports left")
+		// If we still have zero value port number, this means that we reached our port limits
+		return 0, errors.New(NO_MORE_PORTS)
 	}
 
-	// fmt.Println("🥳 We got a slice of available ports: ", availablePorts)
+	// Saving the port to DB
+	savePortNumber(userName, freePort)
+
 	return freePort, nil
 }
 
@@ -80,7 +99,7 @@ func createAllowPortsGenerator(portsRange string) func() (int, error) {
 			j++
 			if j >= len(ranges) {
 				j--
-				return 0, errors.New("no more free ports left")
+				return 0, errors.New(NO_MORE_PORTS)
 			}
 			i = ranges[j][0]
 		}
@@ -90,60 +109,29 @@ func createAllowPortsGenerator(portsRange string) func() (int, error) {
 	}
 }
 
-// func initAvailablePortsIterator(availablePorts []int) func() (int, error) {
-// 	i := 0
-// 	return func() (int, error) {
-// 		if i >= len(availablePorts) {
-// 			return 0, errors.New("no more free ports left")
-// 		}
-// 		r := availablePorts[i]
-// 		i++
-// 		return r, nil
-// 	}
-// }
+func savePortNumber(userName string, port int) {
+	fmt.Printf("Persisting record to DB: userName=%s, port=%+v...\n", userName, port)
 
+	date := time.Now().UTC()
+	ur := store.UserRecord{
+		Port:      port,
+		CreatedAt: date,
+		// IP:        c.ClientIP(),
+	}
+	pr := store.PortRecord{
+		User: userName,
+		CreatedAt: date,
+		// IP:        c.ClientIP(),
+	}
 
-// func GetFreePort(userName string) (int, error) {
-// 	r := new(store.MachineRecord)
-// 	found, _ := db.Get(userName, r)
-// 	fmt.Printf("Found record: %v.\n", found)
-// 	var p = r.Port
-//
-// 	if !found {
-// 		fmt.Println("Record does not exist. Setting it...")
-// 		p, err := NextPort()
-// 		fmt.Println("Got port: ", p)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 			return 0, err
-// 		}
-//
-// 		date := time.Now().UTC()
-// 		rec1 := store.MachineRecord{
-// 			Port:      p,
-// 			IP:        c.ClientIP(),
-// 			CreatedAt: date,
-// 		}
-// 		rec2 := store.PortRecord{
-// 			MachineID: body.MachineID,
-// 			IP:        c.ClientIP(),
-// 			CreatedAt: date,
-// 		}
-//
-// 		err = db.Set(body.MachineID, rec1)
-// 		if err != nil {
-// 			fmt.Printf("Error setting value: %v.\n", err)
-// 			panic(err)
-// 		}
-// 		err = db.Set(strconv.Itoa(p), rec2)
-// 		if err != nil {
-// 			fmt.Printf("Error setting value: %v.\n", err)
-// 			panic(err)
-// 		}
-// 		remotePort = p
-// 	}
-//
-// 	return 0, err
-//
-// 	return p, nil
-// }
+	err := store.DB.Set(userName, ur)
+	if err != nil {
+		fmt.Printf("Error setting value: %+v.\n", err)
+		panic(err)
+	}
+	err = store.DB.Set(strconv.Itoa(port), pr)
+	if err != nil {
+		fmt.Printf("Error setting value: %+v.\n", err)
+		panic(err)
+	}
+}

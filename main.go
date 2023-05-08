@@ -64,8 +64,8 @@ func init() {
 
 	// ports.InitPortsIterator(commonSection.AllowPorts)
 }
-
 func main() {
+
 	defer store.DB.Close()
 	server.Start()
 }
