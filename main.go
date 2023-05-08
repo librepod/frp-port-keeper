@@ -6,6 +6,7 @@ import (
 
 	"gopkg.in/ini.v1"
 
+	"main/ports"
 	"main/server"
 	"main/store"
 )
@@ -62,24 +63,10 @@ func init() {
 	}
 	fmt.Println("We got allowPorts: ", commonSection.AllowPorts)
 
-	// ports.InitPortsIterator(commonSection.AllowPorts)
+	ports.InitPortsGenerator(commonSection.AllowPorts)
 }
-func main() {
 
+func main() {
 	defer store.DB.Close()
 	server.Start()
 }
-
-// // Get user value
-// r.GET("/port-registrations/:machineId", func(c *gin.Context) {
-// 	machineId := c.Params.ByName("machineId")
-// 	retrievedVal := new(store.Record)
-// 	var db = store.CreateStore()
-// 	defer db.Close()
-// 	data, err := db.Get(machineId, retrievedVal)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-//
-// 	c.JSON(http.StatusOK, gin.H{"machineId": machineId, "value": data})
-// })

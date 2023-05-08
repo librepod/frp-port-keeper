@@ -58,7 +58,7 @@ services:
     image: snowdreamtech/frpc:0.48.0
     container_name: frpc
     environment:
-      USER: testuser_1
+      USER: testuser
     ports:
       - 7400:7400
       - 7500:7500

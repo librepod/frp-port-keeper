@@ -13,10 +13,9 @@ const NO_MORE_PORTS = "NO_MORE_FREE_PORTS_LEFT"
 
 var nextPort func() (int, error)
 
-func init() {
-	// TODO: Pass port range from frps.ini config
-	allowedPorts := "6008-6010,6017"
-	nextPort = createAllowPortsGenerator(allowedPorts)
+func InitPortsGenerator(allowPorts string) {
+	fmt.Println("Initializing ports generator...")
+	nextPort = createAllowPortsGenerator(allowPorts)
 }
 
 func GetFreePort(userName string) (int, error) {
