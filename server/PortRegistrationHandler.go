@@ -6,17 +6,11 @@ import (
 	"net/http"
 
 	"main/ports"
-	"main/store"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Request struct {
-	Version string  `json:"version"`
-	Op      string  `json:"op"`
-	Content Content `json:"content"`
-}
-
+// NewProxy sample payload body
 // {
 // 	"version":"0.1.0",
 // 	"op":"NewProxy",
@@ -24,12 +18,18 @@ type Request struct {
 // 		"user":{
 // 			"user":"alexmachine",
 // 			"metas":null,
-// 			"run_id":"ce8fa6855d955ad0"
+// 			"run_id":"xxxxxxxxxxxxxxxx"
 // 		},
-// 	"proxy_name":"alexmachine.librepod-relay",
+// 	"proxy_name":"xxxxxxxxxxx.librepod-relay",
 // 	"proxy_type":"udp"
 // 	}
 // }
+
+type Request struct {
+	Version string  `json:"version"`
+	Op      string  `json:"op"`
+	Content Content `json:"content"`
+}
 
 type Content struct {
 	User      User   `json:"user"`
@@ -57,8 +57,13 @@ func PortRegistrationsHandler(c *gin.Context) {
 	// Retrieve the request body
 	var requestBody Request
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
-		fmt.Println("Error trying to bind request body")
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		fmt.Println("error trying to bind request body")
+		c.AbortWithStatusJSON(http.StatusBadRequest,
+			gin.H{
+				"error":   "VALIDATEERR",
+				"message": "Invalid inputs. Please check your payload",
+			},
+		)
 		return
 	}
 
@@ -69,10 +74,11 @@ func PortRegistrationsHandler(c *gin.Context) {
 	fmt.Printf("🔅 Got request Operation: %s\n", op)
 
 	// Pretty print the request body to console
-	requestBodyBytes, _ := json.MarshalIndent(requestBody, "", "  ")
-	// if err != nil {
-	// 	fmt.Println("Error marshaling request body:", err)
-	// }
+	requestBodyBytes, err := json.MarshalIndent(requestBody, "", "  ")
+	if err != nil {
+		fmt.Println("Error marshaling request body:", err)
+	}
+	fmt.Println("Request body: ", string(requestBodyBytes))
 
 	if op != "NewProxy" {
 		fmt.Printf("returning default response...\n")
@@ -80,11 +86,10 @@ func PortRegistrationsHandler(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("Aloha!!! We got NewProxy operation!")
-	fmt.Println("Request body:", string(requestBodyBytes))
+	fmt.Println("👋 Aloha!!! We got NewProxy operation!")
 
-	p, err := ports.NextPortGenerator()
-	if err != nil && err.Error() == "no more ports left" {
+	p, err := ports.GetFreePort()
+	if err != nil && err.Error() == "no more free ports left" {
 		fmt.Println("No more ports left")
 		c.JSON(http.StatusForbidden, noMorePortsBody)
 		return
@@ -92,6 +97,10 @@ func PortRegistrationsHandler(c *gin.Context) {
 
 	var res = Response{
 		Unchange: false,
+	// Save the alocated port to DB
+	// var db = store.CreateStore()
+	// db.Set()
+
 		Content: Content{
 			User: requestBody.Content.User,
 			ProxyName: requestBody.Content.ProxyName,
@@ -103,10 +112,6 @@ func PortRegistrationsHandler(c *gin.Context) {
 	responseBodyBytes, _ := json.MarshalIndent(res, "", "  ")
 	fmt.Println("Allowing NewProxy connection...")
 	fmt.Println("Response body: ", string(responseBodyBytes))
-
-	// Save the alocated port to DB
-	var db = store.CreateStore()
-	db.Set()
 
 	c.JSON(http.StatusOK, res)
 }

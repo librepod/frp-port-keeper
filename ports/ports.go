@@ -8,7 +8,43 @@ import (
 	"strings"
 )
 
-var NextPortGenerator func() (int, error)
+var nextPort func() (int, error)
+
+func init() {
+	// TODO: Pass port range from frps.ini config
+	allowedPorts := "6007-6010,6013,6017"
+	nextPort = createAllowPortsGenerator(allowedPorts)
+}
+
+func GetFreePort() (int, error) {
+	fmt.Println("Getting a pree port")
+
+	freePort := 0
+
+	// Iterate through all the allowedPorts skeeping those that had been already
+	// alocated to somebody (have records in DB)
+	for p, err := nextPort(); err == nil; p, err = nextPort() {
+		fmt.Printf("Trying port %s...\n", p)
+		portRecord := store.PortRecord{}
+		found, dbErr := store.DB.Get(strconv.Itoa(p), &portRecord)
+		if dbErr != nil {
+			fmt.Println("error occurred accessing db")
+			panic(dbErr)
+		}
+		if !found {
+			fmt.Println("Found a free port to use: ", p)
+			freePort = p
+			break
+		}
+	}
+
+	if freePort == 0 {
+		return 0, errors.New("no more free ports left")
+	}
+
+	// fmt.Println("🥳 We got a slice of available ports: ", availablePorts)
+	return freePort, nil
+}
 
 // This is a closure that accepts port ranges in string representation like this:
 // `3000-8000,60000-65000` and returns an iterator function which returns
@@ -54,44 +90,60 @@ func createAllowPortsGenerator(portsRange string) func() (int, error) {
 	}
 }
 
-func initAvailablePortsIterator(availablePorts []int) func() (int, error) {
-	i := 0
-	return func() (int, error) {
-		if i >= len(availablePorts) {
-			return 0, errors.New("no more free ports left")
-		}
-		r := availablePorts[i]
-		i++
-		return r, nil
-	}
-}
+// func initAvailablePortsIterator(availablePorts []int) func() (int, error) {
+// 	i := 0
+// 	return func() (int, error) {
+// 		if i >= len(availablePorts) {
+// 			return 0, errors.New("no more free ports left")
+// 		}
+// 		r := availablePorts[i]
+// 		i++
+// 		return r, nil
+// 	}
+// }
 
-func InitPortsIterator(portsRange string) func() (int, error) {
-	fmt.Println("portsRange: ", portsRange)
 
-	var nextPort = createAllowPortsGenerator(portsRange)
-	var availablePorts = []int{}
-
-	var db = store.CreateStore()
-	defer db.Close()
-
-	// Iterate through all the allowedPorts sorting out those that had been already
-	// alocated to somebody (have records in DB)
-	for p, err := nextPort(); err == nil; p, err = nextPort() {
-		portRecord := store.PortRecord{}
-		found, dbErr := db.Get(strconv.Itoa(p), &portRecord)
-		if dbErr != nil {
-			fmt.Println("error occurred accessing db")
-			panic(dbErr)
-		}
-		if found {
-			continue
-		}
-
-		availablePorts = append(availablePorts, p)
-	}
-	// fmt.Println("🥳 We got a slice of available ports: ", availablePorts)
-	NextPortGenerator = initAvailablePortsIterator(availablePorts)
-
-	return NextPortGenerator
-}
+// func GetFreePort(userName string) (int, error) {
+// 	r := new(store.MachineRecord)
+// 	found, _ := db.Get(userName, r)
+// 	fmt.Printf("Found record: %v.\n", found)
+// 	var p = r.Port
+//
+// 	if !found {
+// 		fmt.Println("Record does not exist. Setting it...")
+// 		p, err := NextPort()
+// 		fmt.Println("Got port: ", p)
+// 		if err != nil {
+// 			fmt.Println(err)
+// 			return 0, err
+// 		}
+//
+// 		date := time.Now().UTC()
+// 		rec1 := store.MachineRecord{
+// 			Port:      p,
+// 			IP:        c.ClientIP(),
+// 			CreatedAt: date,
+// 		}
+// 		rec2 := store.PortRecord{
+// 			MachineID: body.MachineID,
+// 			IP:        c.ClientIP(),
+// 			CreatedAt: date,
+// 		}
+//
+// 		err = db.Set(body.MachineID, rec1)
+// 		if err != nil {
+// 			fmt.Printf("Error setting value: %v.\n", err)
+// 			panic(err)
+// 		}
+// 		err = db.Set(strconv.Itoa(p), rec2)
+// 		if err != nil {
+// 			fmt.Printf("Error setting value: %v.\n", err)
+// 			panic(err)
+// 		}
+// 		remotePort = p
+// 	}
+//
+// 	return 0, err
+//
+// 	return p, nil
+// }

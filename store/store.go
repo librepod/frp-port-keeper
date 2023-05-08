@@ -27,6 +27,13 @@ type PortRecord struct {
 	CreatedAt time.Time
 }
 
+var DB gokv.Store
+
+func init() {
+	fmt.Println("Initializing store...")
+	DB = createStore()
+}
+
 func PrettyStruct(data interface{}) (string, error) {
 	val, err := json.MarshalIndent(data, "", "    ")
 	if err != nil {
@@ -35,17 +42,14 @@ func PrettyStruct(data interface{}) (string, error) {
 	return string(val), nil
 }
 
-func CreateStore() gokv.Store {
-
+func createStore() gokv.Store {
 	options := redis.DefaultOptions // Address: "localhost:6379", Password: "", DB: 0
-
-	// Create client
-	store, err := redis.NewClient(options)
+	db, err := redis.NewClient(options)
 	if err != nil {
 		fmt.Println("Error occured connecting to redis: ", err)
 		panic(err)
 	}
-	return store
+	return db
 }
 
 // func CreateStore() gokv.Store {

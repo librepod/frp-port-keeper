@@ -6,11 +6,9 @@ import (
 
 	"gopkg.in/ini.v1"
 
-	"main/ports"
 	"main/server"
+	"main/store"
 )
-
-var nextPort func() (int, error)
 
 // ServerConf contains information for a server service. It is
 // recommended to use GetDefaultServerConf instead of creating this object
@@ -64,11 +62,11 @@ func init() {
 	}
 	fmt.Println("We got allowPorts: ", commonSection.AllowPorts)
 
-	ports.InitPortsIterator(commonSection.AllowPorts)
-
+	// ports.InitPortsIterator(commonSection.AllowPorts)
 }
 
 func main() {
+	defer store.DB.Close()
 	server.Start()
 }
 
