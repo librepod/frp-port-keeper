@@ -32,10 +32,10 @@ type Request struct {
 }
 
 type Content struct {
-	User      User   `json:"user"`
-	ProxyName string `json:"proxy_name"`
-	ProxyType string `json:"proxy_type"`
-	ProxyPort int    `json:"remot_port,omitempty"`
+	User       User   `json:"user"`
+	ProxyName  string `json:"proxy_name"`
+	ProxyType  string `json:"proxy_type"`
+	RemotePort int    `json:"remote_port,omitempty"`
 }
 
 type User struct {
@@ -85,7 +85,7 @@ func PortRegistrationsHandler(c *gin.Context) {
 
 	fmt.Println("Processing NewProxy operation...")
 
-	p, err := ports.GetFreePort(requestBody.Content.User.User)
+	p, err := ports.GetFreePort(requestBody.Content.ProxyName)
 	if err != nil {
 		fmt.Printf("Error ocurred getting free port: %+v\n", err.Error())
 		c.JSON(http.StatusOK, gin.H{"reject": true, "reject_reason": err.Error()})
@@ -95,10 +95,10 @@ func PortRegistrationsHandler(c *gin.Context) {
 	var res = Response{
 		Unchange: false,
 		Content: Content{
-			User:      requestBody.Content.User,
-			ProxyName: requestBody.Content.ProxyName,
-			ProxyType: requestBody.Content.ProxyType,
-			ProxyPort: p,
+			User:       requestBody.Content.User,
+			ProxyName:  requestBody.Content.ProxyName,
+			ProxyType:  requestBody.Content.ProxyType,
+			RemotePort: p,
 		},
 	}
 

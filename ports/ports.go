@@ -18,11 +18,11 @@ func InitPortsGenerator(allowPorts string) {
 	nextPort = createAllowPortsGenerator(allowPorts)
 }
 
-func GetFreePort(userName string) (int, error) {
+func GetFreePort(proxyName string) (int, error) {
 	fmt.Println("Looking for a free port...")
 
-	userRecord := store.UserRecord{}
-	found, dbErr := store.DB.Get(userName, &userRecord)
+	userRecord := store.ProxyRecord{}
+	found, dbErr := store.DB.Get(proxyName, &userRecord)
 	if dbErr != nil {
 		fmt.Println("error occurred accessing db")
 		panic(dbErr)
@@ -32,7 +32,7 @@ func GetFreePort(userName string) (int, error) {
 		return userRecord.Port, nil
 	}
 
-	fmt.Printf("No record in DB for the '%s' user\n", userName)
+	fmt.Printf("No record in DB for the '%s' user\n", proxyName)
 	fmt.Println("Allocating new port number for the user...")
 
 	freePort := 0
@@ -59,7 +59,7 @@ func GetFreePort(userName string) (int, error) {
 	}
 
 	// Saving the port to DB
-	savePortNumber(userName, freePort)
+	savePortNumber(proxyName, freePort)
 
 	return freePort, nil
 }
@@ -108,22 +108,22 @@ func createAllowPortsGenerator(portsRange string) func() (int, error) {
 	}
 }
 
-func savePortNumber(userName string, port int) {
-	fmt.Printf("Persisting record to DB: userName=%s, port=%+v...\n", userName, port)
+func savePortNumber(proxyName string, port int) {
+	fmt.Printf("Persisting record to DB: userName=%s, port=%+v...\n", proxyName, port)
 
 	date := time.Now().UTC()
-	ur := store.UserRecord{
+	ur := store.ProxyRecord{
 		Port:      port,
 		CreatedAt: date,
 		// IP:        c.ClientIP(),
 	}
 	pr := store.PortRecord{
-		User: userName,
+		Proxy: proxyName,
 		CreatedAt: date,
 		// IP:        c.ClientIP(),
 	}
 
-	err := store.DB.Set(userName, ur)
+	err := store.DB.Set(proxyName, ur)
 	if err != nil {
 		fmt.Printf("Error setting value: %+v.\n", err)
 		panic(err)

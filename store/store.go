@@ -9,14 +9,14 @@ import (
 	"github.com/philippgille/gokv/file"
 )
 
-type UserRecord struct {
+type ProxyRecord struct {
 	Port      int
 	// IP        string
 	CreatedAt time.Time
 }
 
 type PortRecord struct {
-	User string
+	Proxy string
 	// IP        string
 	CreatedAt time.Time
 }
