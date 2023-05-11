@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 
 	"gopkg.in/ini.v1"
@@ -48,7 +47,8 @@ func UnmarshalServerConfFromIni(source interface{}) (ServerConf, error) {
 	if allowPortStr != "" {
 		common.AllowPorts = allowPortStr
 	} else {
-		return ServerConf{}, errors.New("common.allow_ports not specified in config")
+		fmt.Println("⚠ common.allow_ports not specified in config")
+		common.AllowPorts = "1-65535"
 	}
 
 	return common, nil
