@@ -1,6 +1,10 @@
 # frp-port-keeper
 This is a plugin for the awesome [frp reverse proxy](https://github.com/fatedier/frp). 
 
+| :exclamation:  This is an early alpha version which needs further refactoring and improvements (see the [TODO](https://github.com/librepod/frp-port-keeper/tree/develop#todo) section) |
+|------------------------------------------------------------------------------------------------------------------|
+
+
 ## What is it for?
 The purpose of this plugin is to keep track of `remote_ports` that are being assigned
 to frp clients upon initial connection to frp server. With this plugin, you can be
@@ -110,7 +114,7 @@ It is possible that the plugin works for older version even though it has not be
  6. Profit.
 
 ## TODO
-[ ] Pass `allow_ports` param via cli
+[ ] Pass `allow_ports` param via cli  
 [ ] Add unit tests  
 [ ] Add proper error handling in case if payload is not as expected  
 [ ] Cross compile for other platforms (currently supports only amd64)  
