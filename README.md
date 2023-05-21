@@ -96,8 +96,18 @@ It is possible that the plugin works for older version even though it has not be
  2. Plugin needs to read the `allow_ports` value from the frps.ini file,
     therefore you need to move the binary to the same folder where you have the 
     frps.ini file located and have the `allow_ports` value specified under
-    the common section.
-
+    the `common` section.
+ 3. Register plugin in frps.ini like this:
+    ```ini
+    [plugin.frp-port-keeper]
+    addr = 127.0.0.1:8080
+    path = /port-registrations
+    ops = NewProxy
+    ```
+ 4. Run the frp-port-keeper plugin (preferably via a systemd service) and make
+    sure that it works fine (hit the `GET /ping` endpoint).
+ 5. Run the frp server.
+ 6. Profit.
 
 ## TODO
 [ ] Pass `allow_ports` param via cli
