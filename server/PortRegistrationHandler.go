@@ -10,20 +10,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// NewProxy sample payload body
-// {
-// 	"version":"0.1.0",
-// 	"op":"NewProxy",
-// 	"content":{
-// 		"user":{
-// 			"user":"alexmachine",
-// 			"metas":null,
-// 			"run_id":"xxxxxxxxxxxxxxxx"
-// 		},
-// 	"proxy_name":"xxxxxxxxxxx.librepod-relay",
-// 	"proxy_type":"udp"
-// 	}
-// }
+/*
+NewProxy sample payload
+{
+	"version": "0.1.0",
+	"op": "NewProxy",
+	"content": {
+		"user": {
+			"user": "username",
+			"metas": null,
+			"run_id": "xxxxxxxxxxxxxxxx"
+		},
+	"proxy_name": "username.proxy-name",
+	"proxy_type": "udp"
+	}
+}
+*/
 
 type Request struct {
 	Version string  `json:"version"`
@@ -61,7 +63,7 @@ func PortRegistrationsHandler(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest,
 			gin.H{
 				"error":   "VALIDATEERR",
-				"message": "Invalid inputs. Please check your payload",
+				"message": "Invalid inputs. Please check your frpc.ini config.",
 			},
 		)
 		return
