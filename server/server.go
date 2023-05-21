@@ -9,6 +9,7 @@ import (
 func setupRouter() *gin.Engine {
 	// Disable Console Color
 	gin.DisableConsoleColor()
+	// gin.SetMode(gin.ReleaseMode)
 	// gin.ForceConsoleColor()
 	r := gin.Default()
 
@@ -18,7 +19,6 @@ func setupRouter() *gin.Engine {
 	})
 
 	r.POST("/port-registrations", PortRegistrationsHandler)
-	// r.POST("/old-port-registrations", HandlerOld)
 
 	return r
 }
