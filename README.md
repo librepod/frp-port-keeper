@@ -16,7 +16,7 @@ frp-port-keeper is a simple server that exposes a `POST /port-registrations` end
 that processes the *NewProxy* payload from the frp server. It is utilizing a simple
 key/value store to track ports and correspinding users. Port allocation data
 persists in json files under the `gokv` folder (The `gokv` folder is created in the
-same directory where the frp-port-keeper executable is executed from).
+same directory where the frp-port-keeper executable is located).
 
 ### Endpoint details
 This handler is used to allocate ports for the proxy requests storing the mapping of
