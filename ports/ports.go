@@ -115,12 +115,10 @@ func savePortNumber(proxyName string, port int) {
 	ur := store.ProxyRecord{
 		Port:      port,
 		CreatedAt: date,
-		// IP:        c.ClientIP(),
 	}
 	pr := store.PortRecord{
-		Proxy: proxyName,
+		Proxy:     proxyName,
 		CreatedAt: date,
-		// IP:        c.ClientIP(),
 	}
 
 	err := store.DB.Set(proxyName, ur)

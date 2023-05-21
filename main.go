@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"gopkg.in/ini.v1"
 
@@ -47,21 +48,26 @@ func UnmarshalServerConfFromIni(source interface{}) (ServerConf, error) {
 	if allowPortStr != "" {
 		common.AllowPorts = allowPortStr
 	} else {
-		fmt.Println("⚠ common.allow_ports not specified in config")
-		common.AllowPorts = "1-65535"
+		fmt.Println("⚠ common.allow_ports not specified in config, falling back to 1000-65535 port range")
+		common.AllowPorts = "1000-65535"
 	}
 
 	return common, nil
 }
 
 func init() {
-	fmt.Println("🐔 Aloha from init func!")
+	fmt.Println("🐔 Initializing the plugin...")
+
+	// Check if frps.ini exists
+	if _, err := os.Stat("./frps.ini"); os.IsNotExist(err) {
+		panic("frps.ini does not exist; move the frp-port-keeper binary to the same folder where the frps.ini located and call frp-port-keeper from there.")
+	}
 
 	var commonSection, err = UnmarshalServerConfFromIni("./frps.ini")
 	if err != nil {
-		fmt.Println("We got error: ", err)
+		fmt.Println("got error: ", err)
 	}
-	fmt.Println("We got allowPorts: ", commonSection.AllowPorts)
+	fmt.Println("got allow_ports value: ", commonSection.AllowPorts)
 
 	ports.InitPortsGenerator(commonSection.AllowPorts)
 }

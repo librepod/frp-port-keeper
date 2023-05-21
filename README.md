@@ -91,10 +91,16 @@ frp version >= v0.48.0
 
 It is possible that the plugin works for older version even though it has not been tested.
 
-## How to run
+## Usage
+ 1. Download the latest frp-port-keeper binary from the [releases page](https://github.com/librepod/frp-port-keeper/releases).
+ 2. Plugin needs to read the `allow_ports` value from the frps.ini file,
+    therefore you need to move the binary to the same folder where you have the 
+    frps.ini file located and have the `allow_ports` value specified under
+    the common section.
 
 
 ## TODO
+[ ] Pass `allow_ports` param via cli
 [ ] Add unit tests  
 [ ] Add proper error handling in case if payload is not as expected  
 [ ] Cross compile for other platforms (currently supports only amd64)  

@@ -3,9 +3,8 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
-
 	"main/ports"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -93,6 +92,7 @@ func PortRegistrationsHandler(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"reject": true, "reject_reason": err.Error()})
 		return
 	}
+	fmt.Println("Port: ", p)
 
 	var res = Response{
 		Unchange: false,
