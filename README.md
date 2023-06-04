@@ -114,10 +114,10 @@ It is possible that the plugin works for older version even though it has not be
  6. Profit.
 
 ## TODO
-[ ] Pass `allow_ports` param via cli  
-[ ] Add unit tests  
-[ ] Add proper error handling in case if payload is not as expected  
-[ ] Cross compile for other platforms (currently supports only amd64)  
-[ ] Refactor by improving modules/folder structure following golang best practices  
-[ ] Add systemd files and instructions to run the plugin as systemd service
+- [ ] Pass `allow_ports` param via cli  
+- [ ] Add unit tests  
+- [ ] Add proper error handling in case if payload is not as expected  
+- [ ] Cross compile for other platforms (currently supports only amd64)  
+- [ ] Refactor by improving modules/folder structure following golang best practices  
+- [ ] Add systemd files and instructions to run the plugin as systemd service
 
