@@ -1,4 +1,4 @@
-name: tweeter-automation
+name: frp-port-keeper-ci
 on:
   workflow_dispatch:
   push:

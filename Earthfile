@@ -46,11 +46,11 @@ release:
       && cat ./tmp-release-notes.json | jq
 
   # Gzip the bins
-  RUN tar -czvf "${OUT_BASE}/darwin/amd64/tweeter_darwin_amd64.tar.gz" -C "${OUT_BASE}/darwin/amd64" frp-port-keeper \
-      && tar -czvf "${OUT_BASE}/darwin/arm64/tweeter_darwin_arm64.tar.gz" -C "${OUT_BASE}/darwin/arm64" frp-port-keeper \
-      && tar -czvf "${OUT_BASE}/windows/amd64/tweeter_windows_amd64.tar.gz" -C "${OUT_BASE}/windows/amd64" frp-port-keeper.exe \
-      && tar -czvf "${OUT_BASE}/linux/amd64/tweeter_linux_amd64.tar.gz" -C "${OUT_BASE}/linux/amd64" frp-port-keeper \
-      && tar -czvf "${OUT_BASE}/linux/arm64/tweeter_linux_arm64.tar.gz" -C "${OUT_BASE}/linux/arm64" frp-port-keeper
+  RUN tar -czvf "${OUT_BASE}/darwin/amd64/frp-port-keeper_darwin_amd64.tar.gz" -C "${OUT_BASE}/darwin/amd64" frp-port-keeper \
+      && tar -czvf "${OUT_BASE}/darwin/arm64/frp-port-keeper_darwin_arm64.tar.gz" -C "${OUT_BASE}/darwin/arm64" frp-port-keeper \
+      && tar -czvf "${OUT_BASE}/windows/amd64/frp-port-keeper_windows_amd64.tar.gz" -C "${OUT_BASE}/windows/amd64" frp-port-keeper.exe \
+      && tar -czvf "${OUT_BASE}/linux/amd64/frp-port-keeper_linux_amd64.tar.gz" -C "${OUT_BASE}/linux/amd64" frp-port-keeper \
+      && tar -czvf "${OUT_BASE}/linux/arm64/frp-port-keeper_linux_arm64.tar.gz" -C "${OUT_BASE}/linux/arm64" frp-port-keeper
 
   # Create release
   RUN jq -r .body tmp-release-notes.json > tmp-release-notes.md \
@@ -59,11 +59,11 @@ release:
         --notes-file tmp-release-notes.md \
         --verify-tag \
         --draft \
-        "${OUT_BASE}/darwin/amd64/tweeter_darwin_amd64.tar.gz#tweeter_osx_amd64" \
-        "${OUT_BASE}/darwin/arm64/tweeter_darwin_arm64.tar.gz#tweeter_osx_arm64" \
-        "${OUT_BASE}/windows/amd64/tweeter_windows_amd64.tar.gz#tweeter_windows_amd64" \
-        "${OUT_BASE}/linux/amd64/tweeter_linux_amd64.tar.gz#tweeter_linux_amd64" \
-        "${OUT_BASE}/linux/arm64/tweeter_linux_arm64.tar.gz#tweeter_linux_arm64"
+        "${OUT_BASE}/darwin/amd64/frp-port-keeper_darwin_amd64.tar.gz#frp-port-keeper_osx_amd64" \
+        "${OUT_BASE}/darwin/arm64/frp-port-keeper_darwin_arm64.tar.gz#frp-port-keeper_osx_arm64" \
+        "${OUT_BASE}/windows/amd64/frp-port-keeper_windows_amd64.tar.gz#frp-port-keeper_windows_amd64" \
+        "${OUT_BASE}/linux/amd64/frp-port-keeper_linux_amd64.tar.gz#frp-port-keeper_linux_amd64" \
+        "${OUT_BASE}/linux/arm64/frp-port-keeper_linux_arm64.tar.gz#frp-port-keeper_linux_arm64"
   
   SAVE ARTIFACT build /build AS LOCAL ./build
 
