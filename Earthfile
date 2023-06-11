@@ -8,6 +8,7 @@ validate-pr:
   RUN go mod download
   COPY . .
   RUN CGO_ENABLED=0 GOOS=linux go build -o ./build/frp-port-keeper ./main.go
+  SAVE ARTIFACT build /build AS LOCAL ./build
 
 multi-build:
   ARG --required RELEASE_VERSION
