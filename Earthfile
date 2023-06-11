@@ -2,14 +2,12 @@ VERSION 0.7
 
 FROM golang:1.18-bullseye
 
-build:
+validate-pr:
   WORKDIR /app
   COPY go.mod go.sum ./
   RUN go mod download
   COPY . .
   RUN CGO_ENABLED=0 GOOS=linux go build -o ./build/frp-port-keeper ./main.go
-
-  SAVE ARTIFACT build /build AS LOCAL ./build
 
 multi-build:
   ARG --required RELEASE_VERSION
