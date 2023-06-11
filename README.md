@@ -1,8 +1,8 @@
 # frp-port-keeper
 This is a plugin for the awesome [frp reverse proxy](https://github.com/fatedier/frp). 
 
-> **Warning**
-> This is an early alpha version which needs further refactoring and improvements (see the [TODO](https://github.com/librepod/frp-port-keeper/tree/develop#todo) section) |
+| :exclamation:  This is an early alpha version which needs further refactoring and improvements (see the [TODO](https://github.com/librepod/frp-port-keeper/tree/develop#todo) section) |
+|------------------------------------------------------------------------------------------------------------------|
 
 
 ## What is it for?
@@ -26,15 +26,15 @@ This handler is used to allocate ports for the proxy requests storing the mappin
 The hendler expects a JSON payload with the following structure:
 ```json
 {
-  "version": "0.1.0",
-  "op": "NewProxy",
-  "content": {
-    "user": {
-      "user": "myiphone"
-    },
-    "proxy_name": "myiphone.my_wireguard_proxy",
-    "proxy_type": "udp"
-  }
+	"version": "0.1.0",
+	"op": "NewProxy",
+	"content": {
+		"user": {
+			"user": "myiphone",
+		},
+	"proxy_name": "myiphone.my_wireguard_proxy",
+	"proxy_type": "udp"
+	}
 }
 ```
 The corresponding frpc.ini config that generates this kind of payload should have 
@@ -58,15 +58,15 @@ The response body will be a JSON with the following structure:
 
 ```json
 {
-  "unchange": false,
-  "content": {
-    "user": {
-      "user": "myiphone"
-    },
-    "proxy_name": "myiphone.my_wireguard_proxy",
-    "proxy_type": "udp",
-    "remote_port": 12345
-  }
+	"unchange": false,
+	"content": {
+		"user": {
+			"user": "myiphone",
+		},
+		"proxy_name": "myiphone.my_wireguard_proxy",
+		"proxy_type": "udp",
+		"remote_port": 12345
+	}
 }
 ```
 
@@ -74,8 +74,8 @@ If the request is not valid due to missing mandatory fields in frpc.ini config, 
 response will be of status 400 with the following content:
 ```json
 {
-  "error":   "VALIDATEERR",
-  "message": "Invalid inputs. Please check your frpc.ini config",
+	"error":   "VALIDATEERR",
+	"message": "Invalid inputs. Please check your frpc.ini config",
 }
 ```
 
@@ -84,8 +84,8 @@ the status would be 200 with the following content:
 
 ```json
 {
-  "reject": true,
-  "reject_reason": "<reject reason>"
+	"reject": true,
+	"reject_reason": "<reject reason>"
 }
 ```
 
@@ -114,10 +114,10 @@ It is possible that the plugin works for older version even though it has not be
  6. Profit.
 
 ## TODO
-[ ] Pass `allow_ports` param via cli  
-[ ] Add unit tests  
-[ ] Add proper error handling in case if payload is not as expected  
-[ ] Cross compile for other platforms (currently supports only amd64)  
-[ ] Refactor by improving modules/folder structure following golang best practices  
-[ ] Add systemd files and instructions to run the plugin as systemd service
+- [ ] Pass `allow_ports` param via cli  
+- [ ] Add unit tests  
+- [ ] Add proper error handling in case if payload is not as expected  
+- [ ] Cross compile for other platforms (currently supports only amd64)  
+- [ ] Refactor by improving modules/folder structure following golang best practices  
+- [ ] Add systemd files and instructions to run the plugin as systemd service
 
