@@ -58,12 +58,22 @@ func UnmarshalServerConfFromIni(source interface{}) (ServerConf, error) {
 func init() {
 	fmt.Println("🐔 Initializing the plugin...")
 
-	// Check if frps.ini exists
-	if _, err := os.Stat("./frps.ini"); os.IsNotExist(err) {
-		panic("frps.ini does not exist; move the frp-port-keeper binary to the same folder where the frps.ini located and call frp-port-keeper from there.")
+	// Get the frps.ini file path from the environment variable
+	frpsIniPath := os.Getenv("FRPS_INI_PATH")
+
+	// If the environment variable is empty or not set
+	if frpsIniPath == "" {
+		// Use the default directory
+		frpsIniPath = "./frps.ini"
 	}
 
-	var commonSection, err = UnmarshalServerConfFromIni("./frps.ini")
+	// Check if frps.ini exists
+	if _, err := os.Stat(frpsIniPath); os.IsNotExist(err) {
+		panicMsg, _ := fmt.Printf("frps.ini does not exist at path %s; move the frp-port-keeper binary to the same folder where the frps.ini located and call frp-port-keeper from there.", frpsIniPath)
+		panic(panicMsg)
+	}
+
+	var commonSection, err = UnmarshalServerConfFromIni(frpsIniPath)
 	if err != nil {
 		fmt.Println("got error: ", err)
 	}
