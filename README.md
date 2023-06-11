@@ -113,11 +113,17 @@ It is possible that the plugin works for older version even though it has not be
  5. Run the frp server.
  6. Profit.
 
+### Usage as Systemd service
+You may want to delegate the control of frp-port-keeper to Systemd just like
+you probably did with the frps service. There are sample Systemd unit files in
+the `systemd` folder. Just tweak them to your liking and copy to the `/etc/systemd/system/`
+folder.
+
+
 ## TODO
 - [ ] Pass `allow_ports` param via cli  
 - [ ] Add unit tests  
 - [ ] Add proper error handling in case if payload is not as expected  
 - [ ] Cross compile for other platforms (currently supports only amd64)  
 - [ ] Refactor by improving modules/folder structure following golang best practices  
-- [ ] Add systemd files and instructions to run the plugin as systemd service
-
+- [ ] Add systemd files and instructions to run the plugin as systemd service  
