@@ -1,3 +1,5 @@
 gokv
 bin
 build
+.arg
+.env
