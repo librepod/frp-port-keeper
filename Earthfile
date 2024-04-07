@@ -1,5 +1,7 @@
 VERSION 0.7
 
+ARG --global TARGET_DOCKER_REGISTRY=ghcr.io/librepod
+
 FROM golang:1.18-bullseye
 
 validate-pr:
@@ -11,7 +13,7 @@ validate-pr:
   SAVE ARTIFACT build /build AS LOCAL ./build
 
 multi-build:
-  ARG --required RELEASE_VERSION
+  ARG RELEASE_VERSION=latest
   ENV PLATFORMS="darwin/amd64 darwin/arm64 windows/amd64 linux/amd64 linux/arm64"
   ENV VERSION_INJECT="github.com/librepod/frp-port-keeper/main.Version"
   ENV OUTPUT_PATH_FORMAT="./build/${RELEASE_VERSION}/{{.OS}}/{{.Arch}}/frp-port-keeper"
@@ -24,6 +26,18 @@ multi-build:
       && gox -osarch="${PLATFORMS}" -ldflags "-X ${VERSION_INJECT}=${RELEASE_VERSION}" -output "${OUTPUT_PATH_FORMAT}"
 
   SAVE ARTIFACT build /build AS LOCAL ./build
+
+build:
+  ARG RELEASE_VERSION=latest
+  ENV GOOS=linux
+  ENV GOARCH=amd64
+
+  WORKDIR /app
+  COPY go.mod go.sum ./
+  RUN go mod download
+  COPY . .
+  RUN go build
+  SAVE ARTIFACT main /frp-port-keeper AS LOCAL ./frp-port-keeper
 
 release:
   FROM  +multi-build
@@ -67,6 +81,28 @@ release:
         "${OUT_BASE}/linux/arm64/frp-port-keeper_linux_arm64.tar.gz#frp-port-keeper_linux_arm64"
   
   SAVE ARTIFACT build /build AS LOCAL ./build
+
+image:
+  # TODO: the built binary doesn't work in alpine images
+  # FROM golang:1.18-alpine3.17
+  FROM golang:1.18-bullseye
+  LABEL org.opencontainers.image.source="https://github.com/librepod/frp-port-keeper"
+  ARG user=gopher
+  ARG group=gopher
+  ARG uid=1000
+  ARG gid=1000
+  ARG HOME=/app
+
+  RUN mkdir -p ${HOME}  \
+      && groupadd -g ${gid} ${group}  \
+      && useradd --home-dir ${HOME} -u ${uid} -g ${group} -s /bin/bash ${user}
+
+  ARG RELEASE_VERSION=latest
+  WORKDIR ${HOME}
+  COPY +build/frp-port-keeper ./frp-port-keeper
+  EXPOSE 8080
+  CMD ["/app/frp-port-keeper"]
+  SAVE IMAGE --push ${TARGET_DOCKER_REGISTRY}/frp-port-keeper:$RELEASE_VERSION
 
 validate-mr:
   # Smoke test the application

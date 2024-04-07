@@ -66,3 +66,26 @@ jobs:
           earthly --ci +release \
             --RELEASE_VERSION=${GITHUB_REF:10} \
             --GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Put back the git branch into git (Earthly uses it for tagging)
+        run: |
+          branch=""
+          if [ -n "$GITHUB_HEAD_REF" ]; then
+            branch="$GITHUB_HEAD_REF"
+          else
+            branch="${GITHUB_REF##*/}"
+          fi
+          git checkout -b "$branch" || true
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ vars.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push docker image
+        run: |
+          earthly --ci --push +image \
+            --TARGET_DOCKER_REGISTRY=ghcr.io/librepod \
+            --RELEASE_VERSION=${{ github.ref_name }}
