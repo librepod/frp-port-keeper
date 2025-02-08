@@ -25,9 +25,9 @@
   "dependencies": {
     "dotenv": "16.4.7",
     "express": "4.21.2",
-    "ini": "5.0.0",
     "lowdb": "7.0.1",
-    "winston": "3.17.0"
+    "winston": "3.17.0",
+    "yaml": "2.7.0"
   },
   "devDependencies": {
     "@tsconfig/node18": "18.2.4",
