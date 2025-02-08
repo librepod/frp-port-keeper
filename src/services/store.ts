@@ -1,13 +1,21 @@
-import NodeCache from 'node-cache';
+import { Low } from 'lowdb';
+import { JSONFileSyncPreset } from 'lowdb/node';
 import logger from '../utils/logger';
 
-let cache: NodeCache;
-
-export const initializeStore = () => {
-  logger.info('Initializing store...');
-  cache = new NodeCache();
+type Data = {
+  proxies: { [key: string]: number };
 };
 
-export const getCache = (): NodeCache => {
-  return cache;
+let db: Low<Data>;
+
+export const initializeStore = async () => {
+  logger.info('Initializing store...');
+  const defaultData: Data = {
+    proxies: {}
+  }
+  return JSONFileSyncPreset('db.json', defaultData)
+};
+
+export const getDb = (): Low<Data> => {
+  return db;
 };

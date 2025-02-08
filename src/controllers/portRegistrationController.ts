@@ -1,15 +1,15 @@
 import { RequestHandler } from 'express';
 import { getNextPort } from '../utils/portGenerator';
-import { getCache } from '../services/store';
+import { getDb } from '../services/store';
 import logger from '../utils/logger';
 
-export const portRegistrationsHandler: RequestHandler = (req, res) => {
+export const portRegistrationsHandler: RequestHandler = async (req, res) => {
   try {
     const { proxy_name } = req.body.content;
     
     // Check if port already assigned for this proxy
-    const cache = getCache();
-    const cachedPort = cache.get<number>(proxy_name);
+    const db = getDb();
+    const cachedPort = db.data?.proxies[proxy_name];
     
     if (cachedPort) {
       logger.info(`Found cached port ${cachedPort} for proxy ${proxy_name}`);
@@ -34,8 +34,9 @@ export const portRegistrationsHandler: RequestHandler = (req, res) => {
     }
 
     // Cache the port
-    cache.set(proxy_name, port);
-    cache.set(port.toString(), proxy_name);
+    db.data.proxies[proxy_name] = port;
+    db.data.proxies[port.toString()] = proxy_name;
+    await db.write();
 
     logger.info(`Assigned port ${port} to proxy ${proxy_name}`);
     

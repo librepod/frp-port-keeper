@@ -22,14 +22,15 @@
     ]
   },
   "dependencies": {
-    "@types/express": "5.0.0",
     "dotenv": "16.4.7",
     "express": "4.21.2",
     "ini": "5.0.0",
+    "lowdb": "7.0.1",
     "node-cache": "5.1.2",
     "winston": "3.17.0"
   },
   "devDependencies": {
+    "@types/express": "5.0.0",
     "@tsconfig/node18": "18.2.4",
     "@types/ini": "4.1.1",
     "@types/mocha": "8.x",
