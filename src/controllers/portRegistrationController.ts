@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import type { RequestHandler } from 'express';
 import { getNextPort } from '../utils/portGenerator';
 import { getDb } from '../services/store';
 import logger from '../utils/logger';
@@ -9,7 +9,9 @@ export const portRegistrationsHandler: RequestHandler = async (req, res) => {
     
     // Check if port already assigned for this proxy
     const db = getDb();
-    const cachedPort = db.data?.proxies[proxy_name];
+    // console.log('db:', db)
+    const cachedPort = db.data.proxies[proxy_name];
+    console.log('cachedPort:', cachedPort)
     
     if (cachedPort) {
       logger.info(`Found cached port ${cachedPort} for proxy ${proxy_name}`);
@@ -24,8 +26,13 @@ export const portRegistrationsHandler: RequestHandler = async (req, res) => {
     }
 
     // Get new port
-    const port = getNextPort();
-    if (!port) {
+    let port = getNextPort();
+    while (port !== null && db.data.ports[port]) {
+      // Port is already taken, get the next port
+      port = getNextPort();
+    }
+
+    if (port === null) {
       res.status(400).json({
         reject: true,
         reject_reason: 'NO_MORE_FREE_PORTS_LEFT'
@@ -33,10 +40,10 @@ export const portRegistrationsHandler: RequestHandler = async (req, res) => {
       return;
     }
 
-    // Cache the port
+    // Save the proxy_name & port
     db.data.proxies[proxy_name] = port;
-    db.data.proxies[port.toString()] = proxy_name;
-    await db.write();
+    db.data.ports[port] = proxy_name;
+    db.write();
 
     logger.info(`Assigned port ${port} to proxy ${proxy_name}`);
     

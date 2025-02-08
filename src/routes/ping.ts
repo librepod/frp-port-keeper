@@ -1,8 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
+import type { Request, Response } from 'express';
 
 const router = Router();
 
-router.get('/', (req: Request, res: Response) => {
+router.get('/', (_: Request, res: Response) => {
   res.send('pong');
 });
 
