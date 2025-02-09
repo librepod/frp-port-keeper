@@ -47,12 +47,16 @@ image:
   ENV NODE_ENV=production
   ENV ALLOW_PORTS=8000-29999
   COPY +build/build /app/build
-  RUN ls -al /app/build
   ENTRYPOINT ["/app/build/frp-port-keeper"]
   SAVE IMAGE --push ${TARGET_DOCKER_REGISTRY}/frp-port-keeper:$RELEASE_VERSION
 
 multi-image:
-  BUILD --platform=linux/amd64 --platform=linux/arm64 +build
+  ARG RELEASE_VERSION=latest
+  # Since oven/bun supply only the linux/amd64 and linux/arm64 platform images,
+  # we build only for them.
+  BUILD --platform=linux/amd64 --platform=linux/arm64 \
+        +image \
+        --RELEASE_VERSION=${RELEASE_VERSION}
 
 multi-build:
   FROM +install

@@ -148,4 +148,5 @@ The response body will be a JSON with the following structure:
 - [ ] Implement proper logging system
 - [ ] Pass `allow_ports` param via cli
 - [x] Cross compile for other platforms (currently supports only amd64)
+- [ ] Build docker images for other platforms (currently supports only linux/amd64 and linux/arm64)
 - [ ] Update systemd files and instructions to run the plugin as systemd service
