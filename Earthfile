@@ -77,11 +77,14 @@ release:
   ARG OUT_BASE="./build/${RELEASE_VERSION}"
 
   # Install gh-cli
-  RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-      && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-      && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-      && apt-get update && apt-get install gh jq -y \
-      && gh --version
+  RUN apt-get update && apt-get install -y wget tar jq git \
+    && GH_CLI_URL="https://github.com/cli/cli/releases/download/v2.66.1/gh_2.66.1_linux_amd64.tar.gz" \
+    && TEMP_DIR=$(mktemp -d) \
+    && wget -q $GH_CLI_URL -O $TEMP_DIR/gh.tar.gz \
+    && tar -xzf $TEMP_DIR/gh.tar.gz -C $TEMP_DIR \
+    && mv $TEMP_DIR/gh_2.66.1_linux_amd64/bin/gh /usr/local/bin/ \
+    && rm -rf $TEMP_DIR \
+    && gh --version
 
   # Generate release notes
   RUN gh api -X POST 'repos/librepod/frp-port-keeper/releases/generate-notes' \
