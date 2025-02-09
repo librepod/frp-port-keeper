@@ -17,6 +17,7 @@ type PortRange = RangePort | SinglePort
 
 export const PORT = process.env['PORT'] || '8080'
 export let ALLOW_PORTS = process.env['ALLOW_PORTS'] || ''
+export const DB_PATH = process.env['DB_PATH'] || './db.json'
 
 if (!ALLOW_PORTS) {
   const frpsConfigPath = process.env['FRPS_CONFIG_PATH'] || './frps.yaml'

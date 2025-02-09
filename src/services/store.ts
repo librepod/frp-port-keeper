@@ -1,6 +1,7 @@
 import { LowSync } from 'lowdb'
 import { JSONFileSyncPreset } from 'lowdb/node'
 import logger from '../utils/logger'
+import { DB_PATH } from '../config'
 
 type Data = {
   proxies: { [key: string]: number }
@@ -13,5 +14,5 @@ export const getDb = (): LowSync<Data> => {
     proxies: {},
     ports: {},
   }
-  return JSONFileSyncPreset('db.json', defaultData)
+  return JSONFileSyncPreset(DB_PATH, defaultData)
 }
