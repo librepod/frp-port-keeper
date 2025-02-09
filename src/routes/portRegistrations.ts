@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import { portRegistrationsHandler } from '../controllers/portRegistrationController';
+import { Router } from 'express'
+import { portRegistrationsHandler } from '../controllers/portRegistrationController'
 
-const router = Router();
+const router = Router()
 
-router.post('/', portRegistrationsHandler);
+router.post('/', portRegistrationsHandler)
 
-export default router;
+export default router

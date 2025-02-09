@@ -1,10 +1,10 @@
-import { Router } from 'express';
-import pingRouter from './ping';
-import portRegistrationsRouter from './portRegistrations';
+import { Router } from 'express'
+import pingRouter from './ping'
+import portRegistrationsRouter from './portRegistrations'
 
-const router = Router();
+const router = Router()
 
-router.use('/ping', pingRouter);
-router.use('/port-registrations', portRegistrationsRouter);
+router.use('/ping', pingRouter)
+router.use('/port-registrations', portRegistrationsRouter)
 
-export default router;
+export default router

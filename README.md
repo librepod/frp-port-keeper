@@ -2,10 +2,11 @@
 
 This is a TypeScript implementation of the [frp reverse proxy](https://github.com/fatedier/frp) port keeper plugin.
 
-| :exclamation:  This is an early alpha version which needs further refactoring and improvements (see the [TODO](#todo) section) |
-|------------------------------------------------------------------------------------------------------------------|
+| :exclamation: This is an early alpha version which needs further refactoring and improvements (see the [TODO](#todo) section) |
+| ----------------------------------------------------------------------------------------------------------------------------- |
 
 ## What is it for?
+
 The purpose of this plugin is to keep track of `remote_ports` that are being assigned
 to frp clients upon initial connection to frp server. With this plugin, you can be
 sure that whenever a client connects to an frp server, it would get the same `remote_port`
@@ -61,6 +62,7 @@ ALLOW_PORTS=6000-7000
 ## Usage
 
 1. Register plugin in frps.ini like this:
+
    ```ini
    [plugin.frp-port-keeper]
    addr = 127.0.0.1:8080
@@ -105,17 +107,18 @@ This handler is used to allocate ports for the proxy requests storing the mappin
 #### Request
 
 The handler expects a JSON payload with the following structure:
+
 ```json
 {
-	"version": "0.1.0",
-	"op": "NewProxy",
-	"content": {
-		"user": {
-			"user": "myiphone",
-		},
-	"proxy_name": "myiphone.my_wireguard_proxy",
-	"proxy_type": "udp"
-	}
+  "version": "0.1.0",
+  "op": "NewProxy",
+  "content": {
+    "user": {
+      "user": "myiphone"
+    },
+    "proxy_name": "myiphone.my_wireguard_proxy",
+    "proxy_type": "udp"
+  }
 }
 ```
 
@@ -125,15 +128,15 @@ The response body will be a JSON with the following structure:
 
 ```json
 {
-	"unchange": false,
-	"content": {
-		"user": {
-			"user": "myiphone",
-		},
-		"proxy_name": "myiphone.my_wireguard_proxy",
-		"proxy_type": "udp",
-		"remote_port": 12345
-	}
+  "unchange": false,
+  "content": {
+    "user": {
+      "user": "myiphone"
+    },
+    "proxy_name": "myiphone.my_wireguard_proxy",
+    "proxy_type": "udp",
+    "remote_port": 12345
+  }
 }
 ```
 

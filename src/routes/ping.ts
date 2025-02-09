@@ -1,10 +1,10 @@
-import { Router } from 'express';
-import type { Request, Response } from 'express';
+import { Router } from 'express'
+import type { Request, Response } from 'express'
 
-const router = Router();
+const router = Router()
 
 router.get('/', (_: Request, res: Response) => {
-  res.send('pong');
-});
+  res.send('pong')
+})
 
-export default router;
+export default router
