@@ -1,43 +1,72 @@
-VERSION 0.7
+VERSION 0.8
 
 ARG --global TARGET_DOCKER_REGISTRY=ghcr.io/librepod
 
-FROM golang:1.18-bullseye
+# See Bun docker documentation: https://bun.sh/guides/ecosystem/docker
+
+# use the official Bun image
+# see all versions at https://hub.docker.com/r/oven/bun/tags
+FROM oven/bun:1
+WORKDIR /usr/src/app
+
+install:
+  # install dependencies into temp directory
+  # this will cache them and speed up future builds
+  RUN mkdir -p /temp/dev
+  COPY package.json bun.lockb /temp/dev/
+  RUN cd /temp/dev && bun install --frozen-lockfile
+
+  # install with --production (exclude devDependencies)
+  RUN mkdir -p /temp/prod
+  COPY package.json bun.lockb /temp/prod/
+  RUN cd /temp/prod && bun install --frozen-lockfile --production
 
 validate-pr:
-  WORKDIR /app
-  COPY go.mod go.sum ./
-  RUN go mod download
+  FROM +install
   COPY . .
-  RUN CGO_ENABLED=0 GOOS=linux go build -o ./build/frp-port-keeper ./main.go
-  SAVE ARTIFACT build /build AS LOCAL ./build
-
-multi-build:
-  ARG RELEASE_VERSION=latest
-  ENV PLATFORMS="darwin/amd64 darwin/arm64 windows/amd64 linux/amd64 linux/arm64"
-  ENV VERSION_INJECT="github.com/librepod/frp-port-keeper/main.Version"
-  ENV OUTPUT_PATH_FORMAT="./build/${RELEASE_VERSION}/{{.OS}}/{{.Arch}}/frp-port-keeper"
-
-  WORKDIR /app
-  COPY go.mod go.sum ./
-  RUN go mod download
-  COPY . .
-  RUN go install github.com/mitchellh/gox@v1.0.1 \
-      && gox -osarch="${PLATFORMS}" -ldflags "-X ${VERSION_INJECT}=${RELEASE_VERSION}" -output "${OUTPUT_PATH_FORMAT}"
-
-  SAVE ARTIFACT build /build AS LOCAL ./build
+  RUN bun run lint
+  RUN bun run format:check
+  RUN bun test
 
 build:
-  ARG RELEASE_VERSION=latest
-  ENV GOOS=linux
-  ENV GOARCH=amd64
-
-  WORKDIR /app
-  COPY go.mod go.sum ./
-  RUN go mod download
+  FROM +install
+  ENV NODE_ENV=production
+  # copy node_modules from temp directory
+  # then copy all (non-ignored) project files into the image
+  RUN cp -r /temp/dev/node_modules node_modules
   COPY . .
-  RUN go build
-  SAVE ARTIFACT main /frp-port-keeper AS LOCAL ./frp-port-keeper
+  RUN bun test
+  RUN bun run build
+  SAVE ARTIFACT build /build AS LOCAL ./build
+
+image:
+  FROM oven/bun:1
+  LABEL org.opencontainers.image.source="https://github.com/librepod/frp-port-keeper"
+  ARG RELEASE_VERSION=latest
+  ENV NODE_ENV=production
+  ENV ALLOW_PORTS=8000-29999
+  COPY +build/build /app/build
+  RUN ls -al /app/build
+  ENTRYPOINT ["/app/build/frp-port-keeper"]
+  SAVE IMAGE --push ${TARGET_DOCKER_REGISTRY}/frp-port-keeper:$RELEASE_VERSION
+
+multi-image:
+  BUILD --platform=linux/amd64 --platform=linux/arm64 +build
+
+multi-build:
+  FROM +install
+  ARG RELEASE_VERSION=latest
+  ENV NODE_ENV=production
+  # copy node_modules from temp directory
+  # then copy all (non-ignored) project files into the image
+  RUN cp -r /temp/dev/node_modules node_modules
+  COPY . .
+  RUN bun build --compile --target=bun-darwin-x64 src/server.ts --outfile build/${RELEASE_VERSION}/darwin/amd64/frp-port-keeper
+  RUN bun build --compile --target=bun-darwin-arm64 src/server.ts --outfile build/${RELEASE_VERSION}/darwin/arm64/frp-port-keeper
+  RUN bun build --compile --target=bun-windows-x64 src/server.ts --outfile build/${RELEASE_VERSION}/windows/amd64/frp-port-keeper
+  RUN bun build --compile --target=bun-linux-x64 src/server.ts --outfile build/${RELEASE_VERSION}/linux/amd64/frp-port-keeper
+  RUN bun build --compile --target=bun-linux-arm64 src/server.ts --outfile build/${RELEASE_VERSION}/linux/arm64/frp-port-keeper
+  SAVE ARTIFACT build /build AS LOCAL ./build
 
 release:
   FROM  +multi-build
@@ -81,31 +110,3 @@ release:
         "${OUT_BASE}/linux/arm64/frp-port-keeper_linux_arm64.tar.gz#frp-port-keeper_linux_arm64"
   
   SAVE ARTIFACT build /build AS LOCAL ./build
-
-image:
-  # TODO: the built binary doesn't work in alpine images
-  # FROM golang:1.18-alpine3.17
-  FROM golang:1.18-bullseye
-  LABEL org.opencontainers.image.source="https://github.com/librepod/frp-port-keeper"
-  ARG user=gopher
-  ARG group=gopher
-  ARG uid=1000
-  ARG gid=1000
-  ARG HOME=/app
-
-  RUN mkdir -p ${HOME}  \
-      && groupadd -g ${gid} ${group}  \
-      && useradd --home-dir ${HOME} -u ${uid} -g ${group} -s /bin/bash ${user}
-
-  ARG RELEASE_VERSION=latest
-  WORKDIR ${HOME}
-  COPY +build/frp-port-keeper ./frp-port-keeper
-  EXPOSE 8080
-  CMD ["/app/frp-port-keeper"]
-  SAVE IMAGE --push ${TARGET_DOCKER_REGISTRY}/frp-port-keeper:$RELEASE_VERSION
-
-validate-mr:
-  # Smoke test the application
-  # TODO: set proper validation
-  BUILD +build
-

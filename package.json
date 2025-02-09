@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc --build",
-    "build.watch": "tsc --build --watch",
+    "build": "bun build ./src/server.ts --compile --outfile build/frp-port-keeper",
+    "build:watch": "tsc --build --watch",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
