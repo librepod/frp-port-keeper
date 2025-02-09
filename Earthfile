@@ -24,6 +24,7 @@ install:
 validate-pr:
   FROM +install
   COPY . .
+  RUN cp -r /temp/dev/node_modules node_modules
   RUN bun run lint
   RUN bun run format:check
   RUN bun test
