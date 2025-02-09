@@ -1,6 +1,6 @@
-# frp-port-keeper (TypeScript)
+# frp-port-keeper
 
-This is a TypeScript implementation of the [frp reverse proxy](https://github.com/fatedier/frp) port keeper plugin.
+This is a plugin for the awesome [frp reverse proxy](https://github.com/fatedier/frp).
 
 | :exclamation: This is an early alpha version which needs further refactoring and improvements (see the [TODO](#todo) section) |
 | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -14,9 +14,8 @@ number that it was allocated initially.
 
 ## Requirements
 
-- Node.js >= 14.x
-- npm >= 6.x
-- frp version >= v0.48.0
+- [Bun](https://bun.sh/) >= 1.1.x
+- [frp](https://github.com/fatedier/frp) version >= v0.60.0
 
 ## Installation
 
@@ -30,19 +29,19 @@ number that it was allocated initially.
 2. **Install dependencies:**
 
    ```bash
-   npm install
+   bun install
    ```
 
 3. **Build the project:**
 
    ```bash
-   npm run build
+   bun run build
    ```
 
 4. **Start the server:**
 
    ```bash
-   npm start
+   bun run start
    ```
 
 ## Configuration
@@ -61,13 +60,15 @@ ALLOW_PORTS=6000-7000
 
 ## Usage
 
-1. Register plugin in frps.ini like this:
+1. Register plugin in frps.yaml like this:
 
-   ```ini
-   [plugin.frp-port-keeper]
-   addr = 127.0.0.1:8080
-   path = /port-registrations
-   ops = NewProxy
+   ```yaml
+   httpPlugins:
+     - name: frp-port-keeper
+       addr: '127.0.0.1:8080'
+       path: /port-registrations
+       ops:
+         - NewProxy
    ```
 
 2. Run the frp-port-keeper plugin (preferably via a systemd service) and make
@@ -87,22 +88,21 @@ folder.
 To run the server in development mode with hot reloading:
 
 ```bash
-npm run dev
+bun run start:watch
 ```
 
 **Scripts:**
 
-- `npm run build`: Compiles TypeScript files to JavaScript
-- `npm run start`: Runs the compiled JavaScript code from the `dist` directory
-- `npm run dev`: Runs the server using `ts-node-dev` for hot reloading during development
-- `npm run test`: Runs the test suite using Jest
+- `bun run build`: Compiles the project into a single executable binary
+- `bun run start`: Runs the project
+- `npm run test`: Runs the test suite using mocha (TBD)
 
 ## API Documentation
 
 ### Endpoint details
 
 This handler is used to allocate ports for the proxy requests storing the mapping of
-`user` param specified in frpc.ini and a free port available.
+`user` param specified in frpc.yaml and a free port available.
 
 #### Request
 
@@ -143,9 +143,9 @@ The response body will be a JSON with the following structure:
 ## TODO
 
 - [ ] Implement Redis for persistent storage
-- [ ] Write additional unit tests
+- [ ] Add unit tests
 - [ ] Improve error handling and input validation
-- [ ] Add Docker support
-- [ ] Update systemd service files for Node.js application
-- [ ] Add proper TypeScript type definitions
 - [ ] Implement proper logging system
+- [ ] Pass `allow_ports` param via cli
+- [x] Cross compile for other platforms (currently supports only amd64)
+- [ ] Update systemd files and instructions to run the plugin as systemd service
