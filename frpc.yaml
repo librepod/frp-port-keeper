@@ -1,0 +1,27 @@
+serverAddr: 127.0.0.1
+serverPort: 7000
+user: "{{ .Envs.USER }}"
+
+auth:
+  method: token
+  token: hello
+
+# Communication protocol used to connect to server
+# Supports tcp, kcp, quic, websocket, wss. Default is tcp
+transport:
+  protocol: quic
+
+# Set admin address for controlling frpc's action via HTTP API (e.g., reload)
+webServer:
+  addr: 127.0.0.1
+  port: 7400
+  user: admin
+  password: admin
+
+proxies:
+  - name: my_wireguard_proxy
+    type: udp
+    localIP: 127.0.0.1
+    localPort: 51820
+    # The actual remote_port will be assigned by frp-port-keeper
+    # remotePort = 1000

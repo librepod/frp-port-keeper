@@ -1,0 +1,36 @@
+bindAddr: 0.0.0.0
+bindPort: 7000
+# UDP port used for QUIC protocol. If not set, QUIC is disabled in frps.
+quicBindPort: 7000
+
+# Only allow frpc to bind ports you list.
+# If you don't specify this, the frp-port-keeper will fall back to 1000-65535 port range
+allowPorts:
+  - start: 6000
+    end: 6999
+  - single: 7000
+
+auth:
+  method: token
+  token: hello
+
+transport:
+  quic:
+    keepalivePeriod: 10
+    maxIdleTimeout: 30
+    maxIncomingStreams: 100000
+
+# Dashboard (admin UI) settings
+webServer:
+  addr: 0.0.0.0
+  port: 7500
+  user: librepod
+  password: librepod-librepod
+
+# Plugin configuration
+httpPlugins:
+  - name: frp-port-keeper
+    addr: '127.0.0.1:8080'
+    path: /port-registrations
+    ops:
+      - NewProxy

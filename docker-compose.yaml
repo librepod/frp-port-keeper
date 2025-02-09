@@ -44,28 +44,27 @@ services:
       - redis
 
   frps:
-    image: snowdreamtech/frps:0.48.0
+    image: ghcr.io/fatedier/frps:v0.61.1
     container_name: frps
     ports:
-      - 7400:7400
       - 7500:7500
     volumes:
-      - ./frps.ini:/etc/frp/frps.ini
+      - ./frps.yaml:/etc/frp/frps.yaml
     network_mode: host
     restart: always
+    command: ["-c", "/etc/frp/frps.yaml"]
 
   frpc:
-    image: snowdreamtech/frpc:0.48.0
+    image: ghcr.io/fatedier/frpc:v0.61.1
     container_name: frpc
     environment:
       USER: testuser
     ports:
       - 7400:7400
-      - 7500:7500
     depends_on:
       - frps
     volumes:
-      - ./frpc.ini:/etc/frp/frpc.ini
+      - ./frpc.yaml:/etc/frp/frpc.yaml
     network_mode: host
     restart: always
-    command: frpc -c /etc/frp/frpc.ini
+    command: ["-c", "/etc/frp/frpc.yaml"]

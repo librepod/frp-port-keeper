@@ -1,0 +1,4 @@
+.github
+*.nix
+flake.lock
+*.yaml
