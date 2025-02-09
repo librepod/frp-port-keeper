@@ -6,7 +6,7 @@ ARG --global TARGET_DOCKER_REGISTRY=ghcr.io/librepod
 
 # use the official Bun image
 # see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:1
+FROM oven/bun:1-slim
 WORKDIR /usr/src/app
 
 install:
